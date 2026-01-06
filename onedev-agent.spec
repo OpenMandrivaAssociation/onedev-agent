@@ -104,6 +104,11 @@ cp %{S:22} %{buildroot}%{confpath}/
 
 touch %{buildroot}%{confpath}/attributes.properties
 
+%post
+# Allow r/w access to namespaced Docker containers
+setfacl -m g:100000:rwx %{workpath}
+setfacl -m d:g:100000:rwx %{workpath}
+
 %files
 %doc README.md
 %license license.txt
