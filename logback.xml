@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true">
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+			<layout class="io.onedev.commons.bootstrap.MaskingPatternLayout">
+				<pattern>${logback.consoleLogPattern}</pattern>
+			</layout>
+		</encoder>
+	</appender>
+
+	<logger name="io.onedev" level="INFO"/>	
+
+	<statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+
+	<root level="WARN">
+		<appender-ref ref="CONSOLE"/>
+	</root>
+</configuration>

@@ -1,0 +1,15 @@
+--- a/src/main/java/io/onedev/agent/Agent.java
++++ b/src/main/java/io/onedev/agent/Agent.java
+@@ -168,12 +168,3 @@
+-			File testFile = new File(installDir, "test");
+-			try (var os = new FileOutputStream(testFile)) {
+-				os.write(UUID.randomUUID().toString().getBytes());
+-			} catch (Exception e) {
+-				System.err.println(String.format("Unable to write test file. Make sure current user owns everything under '%s'",
+-						installDir.getAbsolutePath()));
+-				System.exit(1);
+-			}
+-
+ 			setupProxies();
+ 			configureLogging();
+ 			

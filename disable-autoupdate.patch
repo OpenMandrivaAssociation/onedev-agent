@@ -1,0 +1,121 @@
+--- a/src/main/java/io/onedev/agent/AgentSocket.java
++++ b/src/main/java/io/onedev/agent/AgentSocket.java
+@@ -144,110 +144,7 @@
+     	byte[] messageData = message.getData();
+ 		try {
+ 	    	switch (message.getType()) {
+-	    	case UPDATE:
+-	    		String versionAtServer = new String(messageData, UTF_8);
+-				File wrapperConfFile = new File(Agent.installDir, "conf/wrapper.conf");
+-	    		if (!versionAtServer.equals(Agent.version)) {
+-	    			logger.info("Updating agent to version " + versionAtServer + "...");
+-	    			Client client = ClientBuilder.newClient();
+-	    			try {
+-	    				WebTarget target = client.target(Agent.serverUrl).path("~downloads/agent-lib");
+-	    				Invocation.Builder builder =  target.request();
+-	    				builder.header(HttpHeaders.AUTHORIZATION, KubernetesHelper.BEARER + " " + Agent.token);
+-	    				
+-	    				try (Response response = builder.get()){
+-	    					KubernetesHelper.checkStatus(response);
+-	    					
+-	    					File newLibDir = new File(Agent.installDir, "lib/" + versionAtServer);
+-	    					FileUtils.cleanDir(newLibDir);
+-	    					try (InputStream is = response.readEntity(InputStream.class)) {
+-	    						TarUtils.untar(is, newLibDir, false);
+-	    					} 
+-	    					
+-	    					String wrapperConf = FileUtils.readFileToString(wrapperConfFile, UTF_8);
+-	    					wrapperConf = wrapperConf.replace("../lib/" + Agent.version + "/", "../lib/" + versionAtServer + "/");
+-	    					wrapperConf = wrapperConf.replace("-XX:+IgnoreUnrecognizedVMOptions", "--add-opens=java.base/sun.nio.ch=ALL-UNNAMED");
+-	    					
+-	    					if (!wrapperConf.contains("java.base/jdk.internal.ref=ALL-UNNAMED")) {
+-	    						wrapperConf += ""
+-	    								+ "\r\nwrapper.java.additional.30=--add-modules=java.se"
+-	    								+ "\r\nwrapper.java.additional.31=--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED" 
+-	    								+ "\r\nwrapper.java.additional.32=--add-opens=java.management/sun.management=ALL-UNNAMED"
+-	    								+ "\r\nwrapper.java.additional.33=--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED";
+-	    					}
+-							if (!wrapperConf.contains("java.base/sun.nio.fs=ALL-UNNAMED")) {
+-								wrapperConf += "\r\nwrapper.java.additional.50=--add-opens=java.base/sun.nio.fs=ALL-UNNAMED";
+-							}										
+-	    					if (!wrapperConf.contains("wrapper.disable_console_input")) 
+-	    						wrapperConf += "\r\nwrapper.disable_console_input=TRUE";
+-
+-							wrapperConf = wrapperConf.replaceAll("\r\n(\r\n)+\r\n", "\r\n\r\n");
+-							wrapperConf = wrapperConf.replaceAll("\n(\n)+\n", "\n\n");
+-							wrapperConf = wrapperConf.replace(
+-									"wrapperConfwrapper.java.additional.30=--add-modules=java.se",
+-									"wrapper.java.additional.30=--add-modules=java.se");
+-
+-	    					FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, UTF_8);
+-
+-	    					File logbackConfigFile = new File(Agent.installDir, "conf/logback.xml");
+-	    					String logbackConfig = FileUtils.readFileToString(logbackConfigFile, UTF_8);
+-	    					if (!logbackConfig.contains("MaskingPatternLayout")) {
+-	    						logbackConfig = StringUtils.replace(logbackConfig, 
+-	    								"ch.qos.logback.classic.encoder.PatternLayoutEncoder",
+-	    								"ch.qos.logback.core.encoder.LayoutWrappingEncoder");
+-	    						logbackConfig = StringUtils.replace(logbackConfig, 
+-	    								"<pattern>", 
+-	    								"<layout class=\"io.onedev.commons.bootstrap.MaskingPatternLayout\">\n				<pattern>");
+-	    						logbackConfig = StringUtils.replace(logbackConfig, 
+-	    								"</pattern>", 
+-	    								"</pattern>\n			</layout>");
+-	    						FileUtils.writeStringToFile(logbackConfigFile, logbackConfig, UTF_8);
+-	    					}
+-	    					
+-	    				} 
+-	    			} finally {
+-	    				client.close();
+-	    			}
+-	        		Agent.restart();
+-	    		} else {
+-					if (wrapperConfFile.exists()) {
+-						var confChanged = false;
+-						String wrapperConf = FileUtils.readFileToString(wrapperConfFile, UTF_8);
+-						var lines = Splitter.on('\n').trimResults().splitToList(wrapperConf);
+-						if (lines.stream().noneMatch(it -> it.contains("-XX:MaxRAMPercentage"))) {
+-							confChanged = true;
+-							lines = new ArrayList<>(lines);
+-							lines.removeIf(line -> line.contains("Maximum Java Heap Size (in MB)") || line.contains("wrapper.java.maxmemory"));
+-
+-							int appendIndex = lines.size();
+-							for (int i = 0; i < lines.size(); i++) {
+-								if (lines.get(i).contains("wrapper.java.additional.50")) {
+-									appendIndex = i + 1;
+-									break;
+-								}
+-							}
+-							lines.add(appendIndex, "set.default.max_memory_percent=50");
+-							lines.add(appendIndex, "");
+-							lines.add(appendIndex, "wrapper.java.additional.100=-XX:MaxRAMPercentage=%max_memory_percent%");
+-							wrapperConf = StringUtils.join(lineSeparator(), lines);
+-						}
+-						if (!wrapperConf.contains("-Djdk.io.File.allowDeleteReadOnlyFiles=true")) {
+-							confChanged = true;
+-							wrapperConf += lineSeparator() + "wrapper.java.additional.150=-Djdk.io.File.allowDeleteReadOnlyFiles=true" + lineSeparator();
+-						}
+-						if (wrapperConf.contains("wrapper.java.version.min=11")) {
+-							confChanged = true;
+-							wrapperConf = wrapperConf.replace( "wrapper.java.version.min=11", "wrapper.java.version.min=17");
+-							wrapperConf = wrapperConf.replace("Java version 11", "Java version 17");
+-							wrapperConf = wrapperConf.replace("Java 11 or higher", "Java 17 or higher");
+-						}
+-
+-						if (confChanged) {
+-							FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, UTF_8);
+-							Agent.restart();
+-							break;
+-						}
+-					}
++	    	case UPDATE: {
+ 					AgentData agentData = new AgentData(Agent.token, Agent.osInfo,
+ 							Agent.name, Agent.ipAddress, Agent.cpuCount, Agent.attributes);
+ 					new Message(MessageTypes.AGENT_DATA, agentData).sendBy(session);
+@@ -1106,4 +1003,4 @@
+ 		stopped = true;
+ 	}
+ 	
+-}
+\ No newline at end of file
++}

@@ -1,0 +1,3 @@
+g onedev-agent
+u onedev-agent - "OneDev build agent/executor" /srv/onedev-agent
+m onedev-agent onedev-agent docker

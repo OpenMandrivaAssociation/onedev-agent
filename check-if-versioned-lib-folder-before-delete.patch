@@ -1,0 +1,38 @@
+From 6bfe5a077a6d5fb465b84d7e2b0a94e8174d62e1 Mon Sep 17 00:00:00 2001
+From: Davide Beatrici <git@davidebeatrici.dev>
+Date: Tue, 6 Jan 2026 06:13:24 +0100
+Subject: [PATCH] fix: Check if it's a versioned lib folder before deleting it
+
+It's not the case for distribution packages such as OpenMandriva's.
+---
+ src/main/java/io/onedev/agent/Agent.java | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/src/main/java/io/onedev/agent/Agent.java b/src/main/java/io/onedev/agent/Agent.java
+index 2765398..693fa34 100644
+--- a/src/main/java/io/onedev/agent/Agent.java
++++ b/src/main/java/io/onedev/agent/Agent.java
+@@ -223,11 +223,19 @@ public class Agent {
+ 			File libDir = new File(installDir, "lib");
+ 			if (libDir.exists()) {
+ 				for (File dir: libDir.listFiles()) {
++					if (!dir.isDirectory())
++						continue;
++
++					if (!dir.getName().matches("\\d+(\\.\\d+)*"))
++						// Not a versioned lib folder
++						continue;
++
+ 					if (!dir.getName().equals(version))
++						// Doesn't match the current version, delete it
+ 						FileUtils.deleteDir(dir);
+ 				}
+ 			}
+-			
++
+ 			Properties attributeProps = new Properties();
+ 			
+ 			try (InputStream is = new FileInputStream(new File(installDir, "conf/attributes.properties"))) {
+-- 
+2.51.2
+

@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+exec /usr/bin/env java -jar /usr/libexec/onedev-agent/onedev-agent.jar "$@"
