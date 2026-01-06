@@ -14,7 +14,7 @@
 
 Name:      onedev-agent
 Version:   2.3.7
-Release:   1
+Release:   2
 Summary:   Build agent/executor for OneDev
 URL:       https://code.onedev.io/onedev/agent
 License:   MIT
@@ -58,8 +58,7 @@ Build agent/executor for OneDev
 %install
 mkdir -p %{buildroot}%{confpath} \
          %{buildroot}%{libpath} \
-         %{buildroot}%{workpath} \
-         %{buildroot}%{_rundir}/%{name}
+         %{buildroot}%{workpath}
 
 # Main JAR
 mv target/agent-%{version}.jar \
@@ -82,12 +81,13 @@ After=syslog.target network-online.target
 
 [Service]
 Type=simple
-
+User=%{name}
+Group=%{name}
 ExecStart=tanuki-wrapper %{confpath}/tanuki-wrapper.conf \
 wrapper.pidfile="%{_rundir}/%{name}/tanuki-wrapper.pid"
-
+RuntimeDirectory=%{name}
+RuntimeDirectoryMode=0700
 Environment=JAVA_HOME=$JAVA_HOME
-User=%{name}
 
 [Install]
 WantedBy=multi-user.target
@@ -114,7 +114,6 @@ touch %{buildroot}%{confpath}/attributes.properties
 %dir %attr(0770,root,%{name}) %{confpath}
 %dir %attr(0755,root,root) %{libpath}
 %dir %attr(0770,root,%{name}) %{workpath}
-%dir %attr(0770,root,%{name}) %{_rundir}/%{name}
 
 %config(noreplace) %attr(0660,root,%{name}) %{confpath}/attributes.properties
 %config(noreplace) %attr(0640,root,%{name}) %{confpath}/agent.properties
