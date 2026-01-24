@@ -13,8 +13,8 @@
 %global workpath %{rootpath}/work
 
 Name:      onedev-agent
-Version:   2.3.7
-Release:   2
+Version:   2.3.13
+Release:   1
 Summary:   Build agent/executor for OneDev
 URL:       https://code.onedev.io/onedev/agent
 License:   MIT
@@ -22,18 +22,16 @@ Group:     Servers
 
 # List of available releases:
 # https://code.onedev.io/onedev/agent/~builds?query=%22Job%22+is+%22Release%22+and+successful
-# https://code.onedev.io/~downloads/projects/235/archives?revision=refs/tags/v2.3.7&format=tgz
+# https://code.onedev.io/~downloads/projects/235/archives?revision=refs/tags/v%{version}&format=tgz
 Source0:   %{name}-%{version}.tar.gz
 Source1:   %{name}-%{version}-deps.tar.zst
 Source10:  %{name}.sysusers
 Source20:  agent.properties
 Source21:  logback.xml
-Source22:  tanuki-wrapper.conf
+Source30:  tanuki-wrapper.conf
 
 Patch0:  disable-autoupdate.patch
-Patch1:  feat-allow-to-use-current-working-directory.patch
 Patch2:  no-test-file.patch
-Patch3:  check-if-versioned-lib-folder-before-delete.patch
 
 BuildRequires:  jdk-current
 BuildRequires:  maven >= 3.8.1
@@ -100,7 +98,7 @@ cp %{S:10} %{buildroot}%{_sysusersdir}/%{name}.conf
 # Config
 cp %{S:20} %{buildroot}%{confpath}/
 cp %{S:21} %{buildroot}%{confpath}/
-cp %{S:22} %{buildroot}%{confpath}/
+cp %{S:30} %{buildroot}%{confpath}/
 
 touch %{buildroot}%{confpath}/attributes.properties
 
