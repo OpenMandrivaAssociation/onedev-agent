@@ -10,12 +10,12 @@
 %global rootpath /srv/%{name}
 %global confpath %{rootpath}/conf
 %global libpath %{rootpath}/lib
-%global logpath %{rootpath}/log
+%global logpath %{rootpath}/logs
 %global workpath %{rootpath}/work
 
 Name:      onedev-agent
 Version:   2.4.1
-Release:   1
+Release:   2
 Summary:   Build agent/executor for OneDev
 URL:       https://code.onedev.io/onedev/agent
 License:   MIT
