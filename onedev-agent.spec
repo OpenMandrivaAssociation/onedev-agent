@@ -10,6 +10,7 @@
 %global rootpath /srv/%{name}
 %global confpath %{rootpath}/conf
 %global libpath %{rootpath}/lib
+%global logpath %{rootpath}/log
 %global workpath %{rootpath}/work
 
 Name:      onedev-agent
@@ -27,7 +28,6 @@ Source0:   %{name}-%{version}.tar.gz
 Source1:   %{name}-%{version}-deps.tar.zst
 Source10:  %{name}.sysusers
 Source20:  agent.properties
-Source21:  logback.xml
 Source30:  tanuki-wrapper.conf
 
 Patch0:  disable-autoupdate.patch
@@ -55,6 +55,7 @@ Build agent/executor for OneDev
 %install
 mkdir -p %{buildroot}%{confpath} \
          %{buildroot}%{libpath} \
+         %{buildroot}%{logpath} \
          %{buildroot}%{workpath}
 
 # Main JAR
@@ -96,8 +97,8 @@ cp %{S:10} %{buildroot}%{_sysusersdir}/%{name}.conf
 
 # Config
 cp %{S:20} %{buildroot}%{confpath}/
-cp %{S:21} %{buildroot}%{confpath}/
 cp %{S:30} %{buildroot}%{confpath}/
+cp src/main/resources/agent/conf/logback.xml %{buildroot}%{confpath}/
 
 touch %{buildroot}%{confpath}/attributes.properties
 
@@ -118,6 +119,7 @@ setfacl -m d:g:100000:rwx %{workpath}
 %dir %attr(0755,root,root) %{rootpath}
 %dir %attr(0770,root,%{name}) %{confpath}
 %dir %attr(0755,root,root) %{libpath}
+%dir %attr(0770,root,%{name}) %{logpath}
 %dir %attr(0770,root,%{name}) %{workpath}
 
 %config(noreplace) %attr(0660,root,%{name}) %{confpath}/attributes.properties
