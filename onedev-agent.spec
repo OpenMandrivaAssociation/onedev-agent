@@ -31,7 +31,6 @@ Source21:  logback.xml
 Source30:  tanuki-wrapper.conf
 
 Patch0:  disable-autoupdate.patch
-Patch2:  no-test-file.patch
 
 BuildRequires:  jdk-current
 BuildRequires:  maven >= 3.8.1
@@ -102,6 +101,9 @@ cp %{S:30} %{buildroot}%{confpath}/
 
 touch %{buildroot}%{confpath}/attributes.properties
 
+# A random UUID is written into this test file to check permissions
+touch %{buildroot}%{rootpath}/test
+
 %post
 # Allow r/w access to namespaced Docker containers
 setfacl -m g:100000:rwx %{workpath}
@@ -124,3 +126,5 @@ setfacl -m d:g:100000:rwx %{workpath}
 %attr(0640,root,%{name}) %{confpath}/tanuki-wrapper.conf
 %attr(0644,root,root) %{rootpath}/%{name}.jar
 %attr(0644,root,root) %{libpath}/*
+
+%attr(0664,root,%{name}) %{rootpath}/test
