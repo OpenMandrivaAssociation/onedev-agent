@@ -14,7 +14,7 @@
 %global workpath %{rootpath}/work
 
 Name:      onedev-agent
-Version:   2.3.13
+Version:   2.4.1
 Release:   1
 Summary:   Build agent/executor for OneDev
 URL:       https://code.onedev.io/onedev/agent
